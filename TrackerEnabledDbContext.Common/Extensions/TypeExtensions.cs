@@ -28,7 +28,35 @@ namespace TrackerEnabledDbContext.Common.Extensions
 
         public static KeyValuePair<string, string> GetKeyValuePair<TEntity>(this TEntity entity, Expression<Func<TEntity, object>> property)
         {
-            return new KeyValuePair<string, string>(property.GetPropertyInfo().Name, GetPropertyValue(property, entity).ToString());
+            return new KeyValuePair<string, string>(property.GetPropertyInfo().Name, GetPropertyValue(property, entity)?.ToString());
+        }
+
+        public static object DefaultValue(this Type type)
+        {
+            if (type.IsValueType)
+                return Activator.CreateInstance(type);
+
+            return null;
+        }
+
+        public static bool IsNullable(this Type type)
+        {
+            return Nullable.GetUnderlyingType(type) != null;
+        }
+
+        /// <summary>
+        /// </summary>
+        /// <typeparam name="T">Underlying Type</typeparam>
+        /// <param name="type">Nullable Type</param>
+        /// <returns></returns>
+        public static bool IsNullable<T>(this Type type)
+        {
+            return Nullable.GetUnderlyingType(type) == typeof(T);
+        }
+
+        public static object GetPropertyValue(this object entity, string propertyName)
+        {
+            return entity.GetType().GetPropertyValue(propertyName);
         }
 
         private static TValue GetPropertyValue<TEntity, TValue>(Expression<Func<TEntity, TValue>> property, TEntity entity)
@@ -36,7 +64,8 @@ namespace TrackerEnabledDbContext.Common.Extensions
             return property.Compile()(entity);
         }
 
-        public static PropertyInfo GetPropertyInfo<TSource>(this Expression<Func<TSource, object>> propertyLambda)
+        public static PropertyInfo GetPropertyInfo<TSource, TProperty>(
+            this Expression<Func<TSource, TProperty>> propertyLambda)
         {
             Type type = typeof(TSource);
 
@@ -44,12 +73,12 @@ namespace TrackerEnabledDbContext.Common.Extensions
             
             var propInfo = member.Member as PropertyInfo;
             if (propInfo == null)
-                throw new ArgumentException($"Expression '{propertyLambda}' refers to a field, not a property.");
+                throw new ArgumentException("Expression is not a valid property.");
 
             if (type != propInfo.ReflectedType &&
                 !type.IsSubclassOf(propInfo.ReflectedType))
                 throw new ArgumentException(
-                    $"Expresion '{propertyLambda}' refers to a property that is not from type {type}.");
+                    $"Expresion refers to a property that is not from type {type.Name}.");
 
             return propInfo;
         }
@@ -68,7 +97,6 @@ namespace TrackerEnabledDbContext.Common.Extensions
 
             throw new ArgumentException( $"Expression '{propertyLambda.Name}' refers is not a member expression or unary expression.");
         }
-
         #endregion
     }
 }

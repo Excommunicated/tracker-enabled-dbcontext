@@ -7,8 +7,9 @@ namespace TrackerEnabledDbContext.IntegrationTests
 {
     public class TestTrackerContext : TrackerContext, ITestDbContext
     {
-        private static readonly string TestConnectionString = Environment.GetEnvironmentVariable("TestGenericConnectionString") 
+        protected static readonly string TestConnectionString = Environment.GetEnvironmentVariable("TestGenericConnectionString") 
             ?? "DefaultTestConnection";
+
         public TestTrackerContext()
             : base(TestConnectionString)
         {
@@ -23,5 +24,6 @@ namespace TrackerEnabledDbContext.IntegrationTests
         public DbSet<POCO> POCOs { get; set; }
         public DbSet<TrackedModelWithMultipleProperties> TrackedModelsWithMultipleProperties { get; set; }
         public DbSet<TrackedModelWithCustomTableAndColumnNames> TrackedModelsWithCustomTableAndColumnNames { get; set; }
+        public DbSet<SoftDeletableModel> SoftDeletableModels { get; set; } 
     }
 }

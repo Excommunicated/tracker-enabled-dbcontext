@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
@@ -44,6 +45,7 @@ namespace TrackerEnabledDbContext.Identity
             : base(existingConnection, model, contextOwnsConnection)
         {
         }
+
 
         public DbSet<AuditLog> AuditLog { get; set; }
 
@@ -96,11 +98,11 @@ namespace TrackerEnabledDbContext.Identity
         /// <summary>
         ///     Get all logs for the given model type
         /// </summary>
-        /// <typeparam name="TTable">Type of domain model</typeparam>
+        /// <typeparam name="TEntity">Type of domain model</typeparam>
         /// <returns></returns>
-        public IQueryable<AuditLog> GetLogs<TTable>()
+        public IQueryable<AuditLog> GetLogs<TEntity>()
         {
-            return CommonTracker.GetLogs<TTable>(this);
+            return CommonTracker.GetLogs<TEntity>(this);
         }
 
         /// <summary>
@@ -116,12 +118,12 @@ namespace TrackerEnabledDbContext.Identity
         /// <summary>
         ///     Get all logs for the given model type for a specific record
         /// </summary>
-        /// <typeparam name="TTable">Type of domain model</typeparam>
+        /// <typeparam name="TEntity">Type of domain model</typeparam>
         /// <param name="primaryKey">primary key of record</param>
         /// <returns></returns>
-        public IQueryable<AuditLog> GetLogs<TTable>(object primaryKey)
+        public IQueryable<AuditLog> GetLogs<TEntity>(object primaryKey)
         {
-            return CommonTracker.GetLogs<TTable>(this, primaryKey);
+            return CommonTracker.GetLogs<TEntity>(this, primaryKey);
         }
 
         /// <summary>
@@ -133,17 +135,6 @@ namespace TrackerEnabledDbContext.Identity
         public IQueryable<AuditLog> GetLogs(string tableName, object primaryKey)
         {
             return CommonTracker.GetLogs(this, tableName, primaryKey);
-        }
-
-        /// <summary>
-        ///     Get the id of the most recently created log for the given table name for a specific record
-        /// </summary>
-        /// <param name="tableName">table name</param>
-        /// <param name="primaryKey">primary key of record</param>
-        /// <returns>Log id</returns>
-        public long GetLastAuditLogId(string tableName, object primaryKey)
-        {
-            return CommonTracker.GetLastAuditLogId(this, tableName, primaryKey);
         }
 
         #region -- Async --
